@@ -54,9 +54,8 @@ public class Game extends Activity {
 			public void onClick(View view) {
 				if (currentTurn) {
 					if (validEntry(input_words.getEditableText().toString())) {
-						//turnStart();
 						appendStory(formatEntry(input_words.getEditableText().toString()), 0x559955);
-						//have to end turn as well
+						currentTurn = false;
 					} else {
 						Toast.makeText(getApplicationContext(), "Illegal Entry", Toast.LENGTH_SHORT).show();
 					}
@@ -66,7 +65,12 @@ public class Game extends Activity {
 
 		input_words.setOnClickListener(new OnClickListener() {
 			public void onClick(View view) {
-				game_scroll.fullScroll(ScrollView.FOCUS_DOWN);
+				input_words.postDelayed(new Runnable() {
+	    			@Override
+	    			public void run() {
+	    				game_scroll.fullScroll(ScrollView.FOCUS_DOWN);
+	    			}
+	    		}, 500);
 			}
 		});
 		
@@ -78,12 +82,16 @@ public class Game extends Activity {
 	}
 
 	public void turnStart() {
+		//Initial
+		input_words.setText("");
 		input_words.setEnabled(true);
 		user_timer.setProgress(100);
 		user_timer.setMax(100);
 		user_timerStatus = 100;
 		timer_text.setVisibility(TextView.VISIBLE);
 		Toast.makeText(getApplicationContext(), "Your Turn!", Toast.LENGTH_SHORT).show();
+		
+		//Timer Thread
 		new Thread(new Runnable() {
 			public void run() {
 				timer_start = System.currentTimeMillis();
@@ -105,7 +113,9 @@ public class Game extends Activity {
 						e.printStackTrace();
 					}
 				}
-				runOnUiThread(new Runnable() { // end of turn
+				
+				//End of Turn
+				runOnUiThread(new Runnable() {
 					public void run() {
 						input_words.setEnabled(false);
 						timer_text.setVisibility(TextView.INVISIBLE);
@@ -144,7 +154,7 @@ public class Game extends Activity {
 		String[] split_array = trimmed.split("\\s+");
 		String answer = new String();
 		for (int i = 0; i < split_array.length; i++) {
-			answer = answer + split_array[i];
+			answer += " " + split_array[i];
 		}
 		return answer;
 	}
